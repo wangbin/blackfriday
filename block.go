@@ -15,6 +15,7 @@ package blackfriday
 
 import (
 	"bytes"
+	"strings"
 )
 
 // Parse block-level data.
@@ -875,9 +876,31 @@ func (p *parser) codePrefix(data []byte) int {
 	return 0
 }
 
+func (p *parser) codeLanguagePrefix(data []byte) (pre int, lang string) {
+	var path string
+	if data[0] == '#' && data[1] == '!' { //shebang
+		path = string(data[2:])
+	} else if data[0] == ':' && data[1] == ':' { //colons
+		for index, b := range data[2:] {
+			if b != ':' {
+				path = string(data[index+2:])
+				break
+			}
+		}
+	} else {
+		return
+	}
+	pathSlice := strings.Split(path, "/")
+	lang = pathSlice[len(pathSlice)-1]
+	if len(pathSlice) == 1 {
+		pre = len(data)
+	}
+	return
+}
+
 func (p *parser) code(out *bytes.Buffer, data []byte) int {
 	var work bytes.Buffer
-
+	var language string
 	i := 0
 	for i < len(data) {
 		beg := i
@@ -889,6 +912,12 @@ func (p *parser) code(out *bytes.Buffer, data []byte) int {
 		blankline := p.isEmpty(data[beg:i]) > 0
 		if pre := p.codePrefix(data[beg:i]); pre > 0 {
 			beg += pre
+			if len(language) == 0 {
+				pre, language = p.codeLanguagePrefix(data[beg:i])
+				if pre > 0 {
+					beg += pre
+				}
+			}
 		} else if !blankline {
 			// non-empty, non-prefixed line breaks the pre
 			i = beg
@@ -914,8 +943,7 @@ func (p *parser) code(out *bytes.Buffer, data []byte) int {
 	}
 
 	work.WriteByte('\n')
-
-	p.r.BlockCode(out, work.Bytes(), "")
+	p.r.BlockCode(out, work.Bytes(), language)
 
 	return i
 }

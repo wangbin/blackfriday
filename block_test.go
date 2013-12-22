@@ -970,3 +970,39 @@ func TestFencedCodeBlock_EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK(t *testing.T) {
 	}
 	doTestsBlock(t, tests, EXTENSION_FENCED_CODE|EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK)
 }
+
+func TestCodeLanguagePrefix(t *testing.T) {
+	var tests = []string{
+		"    #!go\n\tfunc foo() bool {\n\t\treturn true;\n\t}\n",
+		"<pre><code class=\"go\">func foo() bool {\n    return true;\n}\n</code></pre>\n",
+
+		"    #!go\n\tfunc foo() string {\n\t\treturn \"hello, world\"\n\t}\n",
+		"<pre><code class=\"go\">func foo() string {\n    return &quot;hello, world&quot;\n}\n</code></pre>\n",
+
+		"    #!/usr/bin/python\n\tdef foo():\n\t\treturn True\n",
+		"<pre><code class=\"python\">#!/usr/bin/python\ndef foo():\n    return True\n</code></pre>\n",
+		"    ::::go\n\tfunc foo() bool {\n\t\treturn true;\n\t}\n",
+		"<pre><code class=\"go\">func foo() bool {\n    return true;\n}\n</code></pre>\n",
+		"    :::/usr/bin/python\n\tdef foo():\n\t\treturn True\n",
+		"<pre><code class=\"python\">:::/usr/bin/python\ndef foo():\n    return True\n</code></pre>\n",
+	}
+	doTestsBlock(t, tests, 0)
+}
+
+func TestCodeLanguagePrefix_EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK(t *testing.T) {
+	var tests = []string{
+		"    #!go\n\tfunc foo() bool {\n\t\treturn true;\n\t}\n",
+		"<pre><code class=\"go\">func foo() bool {\n    return true;\n}\n</code></pre>\n",
+
+		"    #!go\n\tfunc foo() string {\n\t\treturn \"hello, world\"\n\t}\n",
+		"<pre><code class=\"go\">func foo() string {\n    return &quot;hello, world&quot;\n}\n</code></pre>\n",
+
+		"    #!/usr/bin/python\n\tdef foo():\n\t\treturn True\n",
+		"<pre><code class=\"python\">#!/usr/bin/python\ndef foo():\n    return True\n</code></pre>\n",
+		"    ::::go\n\tfunc foo() bool {\n\t\treturn true;\n\t}\n",
+		"<pre><code class=\"go\">func foo() bool {\n    return true;\n}\n</code></pre>\n",
+		"    :::/usr/bin/python\n\tdef foo():\n\t\treturn True\n",
+		"<pre><code class=\"python\">:::/usr/bin/python\ndef foo():\n    return True\n</code></pre>\n",
+	}
+	doTestsBlock(t, tests, EXTENSION_NO_EMPTY_LINE_BEFORE_BLOCK)
+}
